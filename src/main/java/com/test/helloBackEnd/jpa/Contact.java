@@ -32,4 +32,11 @@ public class Contact {
         this.name = name;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Contact) {
+            Contact contact = (Contact) obj;
+            return contact.getId() == id && contact.getName().equals(name);
+        } else return false;
+    }
 }
