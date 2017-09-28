@@ -11,9 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -29,16 +27,10 @@ public class ContactsController {
 
         this.repository = repo;
 
-        if(repository.count() == 0) {
-            repository.save(new Contact(0,"Roman"));
-            repository.save(new Contact(1,"Darlene"));
-            repository.save(new Contact(2,"Jhoyce"));
-            repository.save(new Contact(2, "Myynt"));
-        }
     }
 
     @GetMapping(value = "/hello/contacts")
-    String getContacts(@RequestParam("nameFilter") String regexp) {
+    Map<String, List<Contact>> getContacts(@RequestParam("nameFilter") String regexp) {
 
         logger.info("Parameter passed: " + regexp);
 
@@ -47,11 +39,13 @@ public class ContactsController {
                     return contact.getName().matches(regexp);
                 } ).collect(Collectors.toList());
 
-        return "Contacts" + contacts;
+        HashMap<String, List<Contact>> map = new HashMap<>(1);
+        map.put("contacts", contacts);
+        return map;
 
     }
 
-    @GetMapping("/hello/contact/{Id}")
+    @GetMapping("/hello/contacts/{Id}")
     ResponseEntity<Contact> getContactById( @PathVariable("Id") long id ) {
 
         Contact contact = repository.findOne(id);
@@ -62,32 +56,33 @@ public class ContactsController {
     }
 
     // put new contact
-    @PutMapping(value = "/hello/contact")
-    ResponseEntity putContact(@RequestBody Contact contact) {
+    @PutMapping(value = "/hello/contacts")
+    ResponseEntity<Contact> putContact(@RequestBody Contact contact) {
 
         if(repository.exists(contact.getId())) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("error", "Contact with given id already exists");
-            return new ResponseEntity(headers, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(headers, HttpStatus.CONFLICT);
         } else {
-            return new ResponseEntity(HttpStatus.OK);
+            repository.save(contact);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         }
     }
 
     // replace old one
-    @PostMapping("/hello/contact")
+    @PostMapping("/hello/contacts")
     HttpStatus postNewContact(@RequestBody Contact contact) {
         repository.save(contact);
         return HttpStatus.OK;
     }
 
     @DeleteMapping("/hello/contacts/{Id}")
-    HttpStatus deleteContact(@PathVariable long id) {
+    ResponseEntity<Void> deleteContact(@PathVariable("Id") long id) {
         if(repository.exists(id)) {
             repository.delete(id);
-            return HttpStatus.OK;
+            return ResponseEntity.ok().build();
         } else {
-            return HttpStatus.NOT_FOUND;
+            return ResponseEntity.notFound().build();
         }
     }
 
