@@ -12,6 +12,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -36,6 +38,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@DataJpaTest
 public class HelloBackEndApplicationTests {
 
 	private final Logger logger = LoggerFactory.getLogger(HelloBackEndApplicationTests.class);
@@ -44,6 +47,8 @@ public class HelloBackEndApplicationTests {
 	private TestRestTemplate restTemplate;
 	@Autowired
 	ObjectMapper mapper;
+	@Autowired
+	private TestEntityManager entityManager;
 
 	@Autowired
 	private ContactsRepository repository;
