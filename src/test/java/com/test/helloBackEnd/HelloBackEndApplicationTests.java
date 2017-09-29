@@ -61,7 +61,7 @@ public class HelloBackEndApplicationTests {
 		for(int i = 0; i < SIZE; i++) {
 			String randString = generator.generate(LENGTH);
 			Contact c = new Contact(i, randString);
-			restTemplate.put("/hello/contact", c);
+			restTemplate.put("/hello/contacts", c);
 		}
 
 	}
@@ -75,7 +75,7 @@ public class HelloBackEndApplicationTests {
 			String url = "/hello/contacts?nameFilter=" + URLEncoder.encode(pattern, "UTF-8"); // URL should be encoded to avoid illegal chars
 			Map<String, List<Contact>> actual = restTemplate.getForObject(url, Map.class);
 
-			Contact[] contacts = mapper.convertValue( actual.get("Contacts"), Contact[].class );
+			Contact[] contacts = mapper.convertValue( actual.get("contacts"), Contact[].class );
 
 			List<Contact> expected = StreamSupport.stream(repository.findAll().spliterator(), false)
 					.filter( contact -> contact.getName().matches(pattern) )
@@ -94,7 +94,7 @@ public class HelloBackEndApplicationTests {
 
 		for(int i = 0; i < SIZE; i++) {
 
-			Contact contact = restTemplate.getForObject("/hello/contact/{id}", Contact.class, i);
+			Contact contact = restTemplate.getForObject("/hello/contacts/{id}", Contact.class, i);
 			assertThat(contact).isEqualTo(repository.findOne((long) i));
 		}
 	}
@@ -104,11 +104,11 @@ public class HelloBackEndApplicationTests {
 
 		long rand = r.nextInt(SIZE);
 
-		restTemplate.delete("/hello/contact/{id}", rand);
+		restTemplate.delete("/hello/contacts/{id}", rand);
 		assertThat(repository.findOne(rand)).isNull();
 
 		assertThat(
-				restTemplate.getForObject("/hello/contact/{id}", Contact.class, rand)
+				restTemplate.getForObject("/hello/contacts/{id}", Contact.class, rand)
 		).isNull();
 
 	}
@@ -120,7 +120,7 @@ public class HelloBackEndApplicationTests {
 
 		// try to get removed Contact
 		ResponseEntity<Void> resp = restTemplate.exchange(new RequestEntity<Contact>(
-				HttpMethod.DELETE, new URI("/hello/contact/" + valueOutOfRange)
+				HttpMethod.DELETE, new URI("/hello/contacts/" + valueOutOfRange)
 		), Void.class);
 
 		// assure that removed Contact is not found by the service
